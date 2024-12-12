@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuzzDisk</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background-color: #6200ea;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .file-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .file-list li:last-child {
+            border-bottom: none;
+        }
+
+        .upload {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .upload input {
+            margin-left: 10px;
+        }
+
+        button {
+            background-color: #6200ea;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #4500b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>BuzzDisk</h1>
+        <p>Your personal cloud storage in the browser!</p>
+    </header>
+
+    <div class="container">
+        <div class="upload">
+            <label for="fileInput">Upload a file:</label>
+            <input type="file" id="fileInput">
+        </div>
+
+        <h2>Your Files</h2>
+        <ul id="fileList" class="file-list">
+            <!-- Files will be listed here -->
+        </ul>
+    </div>
+
+    <script>
+        // Utility to handle cookies
+        const cookieUtils = {
+            set: (name, value) => {
+                document.cookie = `${name}=${encodeURIComponent(value)}; path=/`;
+            },
+            get: (name) => {
+                const cookies = document.cookie.split('; ');
+                for (const cookie of cookies) {
+                    const [key, val] = cookie.split('=');
+                    if (key === name) return decodeURIComponent(val);
+                }
+                return null;
+            }
+        };
+
+        // Load existing files from cookies
+        let files = JSON.parse(cookieUtils.get('buzzdisk-files') || '[]');
+
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+
+        // Render the file list
+        const renderFiles = () => {
+            fileList.innerHTML = '';
+            files.forEach((file, index) => {
+                const li = document.createElement('li');
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = file.name;
+
+                const actions = document.createElement('div');
+
+                const downloadButton = document.createElement('button');
+                downloadButton.textContent = 'Download';
+                downloadButton.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = file.data;
+                    link.download = file.name;
+                    link.click();
+                };
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.style.marginLeft = '10px';
+                deleteButton.onclick = () => {
+                    files.splice(index, 1);
+                    cookieUtils.set('buzzdisk-files', JSON.stringify(files));
+                    renderFiles();
+                };
+
+                actions.appendChild(downloadButton);
+                actions.appendChild(deleteButton);
+
+                li.appendChild(nameSpan);
+                li.appendChild(actions);
+                fileList.appendChild(li);
+            });
+        };
+
+        // Handle file upload
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    files.push({ name: file.name, data: reader.result });
+                    cookieUtils.set('buzzdisk-files', JSON.stringify(files));
+                    renderFiles();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Initial render
+        renderFiles();
+    </script>
+</body>
+</html>
