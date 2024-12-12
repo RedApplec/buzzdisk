@@ -83,12 +83,12 @@
 
         <h2>Your Files</h2>
         <ul id="fileList" class="file-list">
-            <!-- Files will be listed here -->
+
         </ul>
     </div>
 
     <script>
-        // Utility to handle cookies
+        
         const cookieUtils = {
             set: (name, value) => {
                 document.cookie = `${name}=${encodeURIComponent(value)}; path=/`;
@@ -103,7 +103,7 @@
             }
         };
 
-        // Load existing files from cookies
+
         let files = JSON.parse(cookieUtils.get('buzzdisk-files') || '[]');
 
         const fileInput = document.getElementById('fileInput');
@@ -147,7 +147,7 @@
             });
         };
 
-        // Handle file upload
+
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
@@ -161,7 +161,7 @@
             }
         });
 
-        // Initial render
+
         renderFiles();
     </script>
 </body>
